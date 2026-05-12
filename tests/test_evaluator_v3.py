@@ -125,7 +125,7 @@ class EvaluatorV3Tests(unittest.TestCase):
                 topic="test topic",
                 query_type="general",
                 items=[{"key": "a"}],
-                judge_model="gemini-3.1-flash-lite-preview",
+                judge_model="gemini-3.1-flash-lite",
                 gemini_api_key="key",
             )
             self.assertEqual({"a": 3}, cached)
@@ -136,7 +136,7 @@ class EvaluatorV3Tests(unittest.TestCase):
                 topic="test topic",
                 query_type="general",
                 items=[],
-                judge_model="gemini-3.1-flash-lite-preview",
+                judge_model="gemini-3.1-flash-lite",
                 gemini_api_key=None,
             )
             self.assertEqual({}, skipped)

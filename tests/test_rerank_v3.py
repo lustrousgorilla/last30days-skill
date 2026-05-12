@@ -172,10 +172,10 @@ class RerankV3Tests(unittest.TestCase):
             plan=make_plan(),
             candidates=[first, second],
             provider=provider,
-            model="gemini-3.1-flash-lite-preview",
+            model="gemini-3.1-flash-lite",
             shortlist_size=1,
         )
-        self.assertEqual("gemini-3.1-flash-lite-preview", provider.model)
+        self.assertEqual("gemini-3.1-flash-lite", provider.model)
         self.assertEqual(95.0, first.rerank_score)
         self.assertEqual("high fit", first.explanation)
         # Tail is scored via the fallback (may or may not carry the entity-miss

@@ -70,8 +70,8 @@ def sample_report() -> schema.Report:
         generated_at="2026-03-16T00:00:00+00:00",
         provider_runtime=schema.ProviderRuntime(
             reasoning_provider="gemini",
-            planner_model="gemini-3.1-flash-lite-preview",
-            rerank_model="gemini-3.1-flash-lite-preview",
+            planner_model="gemini-3.1-flash-lite",
+            rerank_model="gemini-3.1-flash-lite",
         ),
         query_plan=schema.QueryPlan(
             intent="breaking_news",
@@ -239,8 +239,8 @@ class RenderTopCommentsTests(unittest.TestCase):
             generated_at="2026-03-16T00:00:00+00:00",
             provider_runtime=schema.ProviderRuntime(
                 reasoning_provider="gemini",
-                planner_model="gemini-3.1-flash-lite-preview",
-                rerank_model="gemini-3.1-flash-lite-preview",
+                planner_model="gemini-3.1-flash-lite",
+                rerank_model="gemini-3.1-flash-lite",
             ),
             query_plan=schema.QueryPlan(
                 intent="breaking_news",
@@ -424,8 +424,8 @@ class RenderBestTakesCompactTests(unittest.TestCase):
             generated_at="2026-03-16T00:00:00+00:00",
             provider_runtime=schema.ProviderRuntime(
                 reasoning_provider="gemini",
-                planner_model="gemini-3.1-flash-lite-preview",
-                rerank_model="gemini-3.1-flash-lite-preview",
+                planner_model="gemini-3.1-flash-lite",
+                rerank_model="gemini-3.1-flash-lite",
             ),
             query_plan=schema.QueryPlan(
                 intent="breaking_news",

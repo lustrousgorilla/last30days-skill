@@ -9,7 +9,7 @@ from typing import Any
 
 from . import env, http, schema
 
-GEMINI_FLASH_LITE = "gemini-3.1-flash-lite-preview"
+GEMINI_FLASH_LITE = "gemini-3.1-flash-lite"
 GEMINI_PRO = "gemini-3.1-pro-preview"
 OPENAI_DEFAULT = "gpt-5.4-nano"
 XAI_DEFAULT = "grok-4-1-fast"
@@ -232,8 +232,8 @@ def _resolve_model_pins(config: dict[str, Any], depth: str, provider_name: str) 
     rerank_model = config.get("LAST30DAYS_RERANK_MODEL") or default_rerank
 
     if provider_name == "gemini":
-        _require_gemini_31_preview(planner_model, role="planner")
-        _require_gemini_31_preview(rerank_model, role="rerank")
+        _require_gemini_31(planner_model, role="planner")
+        _require_gemini_31(rerank_model, role="rerank")
 
     return planner_model, rerank_model
 
@@ -344,11 +344,11 @@ def _resolve_x_backend(config: dict[str, Any]) -> str | None:
     return env.get_x_source(config)
 
 
-def _require_gemini_31_preview(model: str, *, role: str) -> None:
-    if model.startswith("gemini-3.1-") and model.endswith("-preview"):
+def _require_gemini_31(model: str, *, role: str) -> None:
+    if model.startswith("gemini-3.1-"):
         return
     raise RuntimeError(
-        f"{role} must use a Gemini 3.1 preview model. Got: {model}"
+        f"{role} must use a Gemini 3.1 model. Got: {model}"
     )
 
 
