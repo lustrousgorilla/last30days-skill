@@ -232,5 +232,79 @@ class TestVendoredBirdRuntime(unittest.TestCase):
         self.assertEqual(5, items[0]["engagement"]["likes"])
 
 
+class TestRunBirdSearchJsonDecodeRetry(unittest.TestCase):
+    """When bird-search returns non-JSON stdout, retry the subprocess.
+
+    Twitter's edge sometimes serves an HTML anti-bot interstitial in place of
+    JSON. Before this fix, that response made json.loads raise JSONDecodeError
+    and the function returned {"items": []} with no diagnostic — silent-empty
+    against an orchestrator that can't distinguish "Twitter blocked us" from
+    "no tweets matched the query."
+    """
+
+    def _make_result(self, stdout: str, stderr: str = "", returncode: int = 0):
+        from lib.subproc import SubprocResult
+        return SubprocResult(returncode=returncode, stdout=stdout, stderr=stderr)
+
+    def test_retries_subprocess_on_html_interstitial_then_succeeds(self):
+        """First subprocess attempt returns HTML; second returns JSON → success."""
+        from unittest import mock
+        from lib import bird_x
+
+        html_interstitial = "<!DOCTYPE html><html><body>Rate limited</body></html>"
+        json_success = '[{"id": "1", "text": "tweet"}]'
+
+        results = [
+            (self._make_result(stdout=html_interstitial), None),
+            (self._make_result(stdout=json_success), None),
+        ]
+
+        with mock.patch.object(bird_x, "_invoke_bird_subprocess", side_effect=results), \
+             mock.patch.object(bird_x.time, "sleep") as mock_sleep:
+            response = bird_x._run_bird_search("test", count=10, timeout=30)
+
+        self.assertNotIn("error", response)
+        self.assertEqual(response["items"], [{"id": "1", "text": "tweet"}])
+        # Should have slept between the failed first attempt and the retry.
+        mock_sleep.assert_called_once_with(bird_x.JSON_DECODE_RETRY_DELAY)
+
+    def test_returns_error_after_all_retries_exhausted(self):
+        """All attempts return HTML → error dict with diagnostic + items=[]."""
+        from unittest import mock
+        from lib import bird_x
+
+        html_interstitial = "<!DOCTYPE html><html>blocked</html>"
+        results = [
+            (self._make_result(stdout=html_interstitial), None),
+            (self._make_result(stdout=html_interstitial), None),
+        ]
+
+        with mock.patch.object(bird_x, "_invoke_bird_subprocess", side_effect=results), \
+             mock.patch.object(bird_x.time, "sleep"):
+            response = bird_x._run_bird_search("test", count=10, timeout=30)
+
+        self.assertIn("error", response)
+        self.assertIn("Invalid JSON response", response["error"])
+        # Diagnostic message names the anti-bot interstitial so it's
+        # distinguishable from a genuine no-results case in logs.
+        self.assertIn("anti-bot interstitial", response["error"].lower())
+        self.assertEqual(response["items"], [])
+
+    def test_terminal_subprocess_error_is_not_retried(self):
+        """Subprocess timeout / spawn failure → terminal error, no retry."""
+        from unittest import mock
+        from lib import bird_x
+
+        timeout_error = {"error": "Search timed out after 30s", "items": []}
+        results = [(None, timeout_error)]
+
+        with mock.patch.object(bird_x, "_invoke_bird_subprocess", side_effect=results), \
+             mock.patch.object(bird_x.time, "sleep") as mock_sleep:
+            response = bird_x._run_bird_search("test", count=10, timeout=30)
+
+        self.assertEqual(response, timeout_error)
+        mock_sleep.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
