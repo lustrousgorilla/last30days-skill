@@ -286,7 +286,7 @@ class TestFullExtraction:
 
         with mock.patch("scripts.lib.chrome_cookies.CHROME_COOKIES_DB", Path(db_path)):
             with mock.patch(
-                "scripts.lib.chrome_cookies._get_chrome_encryption_key",
+                "scripts.lib.chrome_cookies._get_chromium_encryption_key",
                 return_value=KNOWN_PASSPHRASE,
             ):
                 result = extract_chrome_cookies_macos(".x.com", ["auth_token", "ct0"])
@@ -319,7 +319,7 @@ class TestFullExtraction:
 
         with mock.patch("scripts.lib.chrome_cookies.CHROME_COOKIES_DB", Path(db_path)):
             with mock.patch(
-                "scripts.lib.chrome_cookies._get_chrome_encryption_key",
+                "scripts.lib.chrome_cookies._get_chromium_encryption_key",
                 return_value=KNOWN_PASSPHRASE,
             ):
                 result = extract_chrome_cookies_macos(".x.com", ["auth_token"])
