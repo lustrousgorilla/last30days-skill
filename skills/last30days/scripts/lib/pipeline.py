@@ -118,9 +118,11 @@ def available_sources(config: dict[str, Any], requested_sources: list[str] | Non
         available.append("truthsocial")
     if config.get("BRAVE_API_KEY") or config.get("EXA_API_KEY") or config.get("SERPER_API_KEY") or config.get("PARALLEL_API_KEY"):
         available.append("grounding")
-    # Perplexity Sonar: opt-in additive source via INCLUDE_SOURCES=perplexity
+    # Perplexity Sonar: opt-in additive source via INCLUDE_SOURCES=perplexity.
+    # Served by the native Perplexity API (PERPLEXITY_API_KEY) or, failing that,
+    # routed through OpenRouter (OPENROUTER_API_KEY).
     include_sources = (config.get("INCLUDE_SOURCES") or "").lower().split(",")
-    if config.get("OPENROUTER_API_KEY") and (
+    if (config.get("PERPLEXITY_API_KEY") or config.get("OPENROUTER_API_KEY")) and (
         "perplexity" in include_sources or (requested_sources and "perplexity" in requested_sources)
     ):
         available.append("perplexity")
