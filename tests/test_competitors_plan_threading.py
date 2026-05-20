@@ -152,6 +152,26 @@ class SubrunKwargsForTests(unittest.TestCase):
         )
         self.assertEqual(kwargs["github_repos"], ["drake/ovo"])
 
+    def test_github_repos_bare_string_coerced_to_list(self):
+        # Regression: a bare string must not survive into downstream iteration,
+        # which would split "owner/repo" character-by-character into bogus
+        # single-char repo queries.
+        kwargs = cli.subrun_kwargs_for(
+            "Hermes",
+            {"github_repos": "NousResearch/hermes-agent"},
+            resolved={},
+        )
+        self.assertEqual(kwargs["github_repos"], ["NousResearch/hermes-agent"])
+
+    def test_github_repos_comma_string_coerced_and_filtered(self):
+        kwargs = cli.subrun_kwargs_for(
+            "Multi",
+            {"github_repos": "owner/repo, junk, other/thing"},
+            resolved={},
+        )
+        # Comma-split into a list, then the non-slash "junk" segment dropped.
+        self.assertEqual(kwargs["github_repos"], ["owner/repo", "other/thing"])
+
     def test_x_related_list_normalized(self):
         kwargs = cli.subrun_kwargs_for(
             "Drake",

@@ -404,6 +404,13 @@ def subrun_kwargs_for(
         github_user = github_user.lstrip("@").lower() or None
 
     github_repos = _choose("github_repos", "github_repos")
+    if isinstance(github_repos, str):
+        # Tolerate a bare (or comma-separated) string where a list is expected.
+        # Without this, a string like "owner/repo" survives the list-only filter
+        # below and downstream iteration splits it character-by-character into
+        # bogus single-char repo queries ("o", "w", "n", ...), producing a
+        # cascade of GitHub 404/403s and zero star enrichment for the entity.
+        github_repos = [r.strip() for r in github_repos.split(",")]
     if isinstance(github_repos, list):
         github_repos = [r.strip() for r in github_repos if r.strip() and "/" in r.strip()] or None
 
